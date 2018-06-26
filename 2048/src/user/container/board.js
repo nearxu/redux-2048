@@ -8,42 +8,70 @@ import {
   moveLeft,
   moveRight,
   moveUp,
-  moveDown
+  moveDown,
+  updateScore
 } from "../reducer/game";
 import { addCube } from "../reducer/cube";
 import "../../css/board.scss";
+import { WSAECONNRESET } from "constants";
 
 class Board extends React.Component {
   constructor(props) {
     super(props);
   }
-  componentWillMount() {
+  moveTion(type) {
     const {
-      initBoard,
       board,
+      score,
       moveLeft,
       moveRight,
+      moveDown,
       moveUp,
-      moveDown
+      updateScore
     } = this.props;
+    let data;
+    switch (type) {
+      case "Left":
+        data = util.moveLeft(board, score);
+        moveLeft(data.matrix);
+        break;
+      case "Right":
+        data = util.moveRight(board, score);
+        moveRight(data.matrix);
+        break;
+      case "Up":
+        data = util.moveUp(board, score);
+        moveUp(data.matrix);
+        break;
+      case "Down":
+        data = util.moveDown(board, score);
+        moveDown(data.matrix);
+        break;
+      default:
+        break;
+    }
+    updateScore(data.score);
+  }
+  componentDidMount() {
+    const { board, initBoard } = this.props;
     initBoard();
     this.generateCubes(board, 2);
     document.addEventListener("keydown", e => {
       switch (e.keyCode) {
         case 37:
-          moveLeft(board);
-          this.generateCubes(board, 2);
-          break;
-        case 39:
-          moveRight(board);
+          this.moveTion("Left");
           this.generateCubes(board, 2);
           break;
         case 38:
-          moveUp(board);
+          this.moveTion("Up");
+          this.generateCubes(board, 2);
+          break;
+        case 39:
+          this.moveTion("Right");
           this.generateCubes(board, 2);
           break;
         case 40:
-          moveDown(board);
+          this.moveTion("Down");
           this.generateCubes(board, 2);
           break;
         default:
@@ -52,10 +80,15 @@ class Board extends React.Component {
     });
   }
   generateCubes(board, num) {
-    const matrix = board.concat();
+    let matrix = board.concat();
+    // matrix = [[1, 2, 3, 4], [4, 3, 2, 1], [1, 2, 3, 4], [4, 3, 2, 1]];
     while (num > 0) {
+      // game over
       if (util.noSpace(matrix)) {
+        alert("game over");
         return false;
+        matrix[randx][randy] = value;
+        // this.props.updateBoard(matrix);
       }
       var randx = util.getRandomNumber(0, 4);
       var randy = util.getRandomNumber(0, 4);
@@ -79,20 +112,23 @@ class Board extends React.Component {
   }
   render() {
     // // cubes [[0,0,0,0]*4]   board [{x:1,y:2,value:2}]
-    const { board, cubes } = this.props;
+    const { board, cubes, score } = this.props;
     return (
-      <div className="grid-container">
-        {// 这是棋盘
-        board.map((rowAry, rowIndex) =>
-          rowAry.map((cellValue, colIndex) => (
-            <Cube
-              key={rowIndex + "-" + colIndex + "-board"}
-              value={cellValue}
-              rowIndex={rowIndex}
-              colIndex={colIndex}
-            />
-          ))
-        )}
+      <div>
+        <h1> score : {score}</h1>
+        <div className="grid-container">
+          {// 这是棋盘
+          board.map((rowAry, rowIndex) =>
+            rowAry.map((cellValue, colIndex) => (
+              <Cube
+                key={rowIndex + "-" + colIndex + "-board"}
+                value={cellValue}
+                rowIndex={rowIndex}
+                colIndex={colIndex}
+              />
+            ))
+          )}
+        </div>
       </div>
     );
   }
@@ -100,7 +136,8 @@ class Board extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    board: state.game.board
+    board: state.game.board,
+    score: state.game.score
   };
 };
 
@@ -117,21 +154,28 @@ const dispatchToProps = dispatch => {
       const cube = { x, y, value };
       dispatch(addCube(cube));
     },
+    updateScore: score => {
+      dispatch(updateScore(score));
+    },
     moveLeft: board => {
-      const newBoard = util.moveLeft(board);
-      dispatch(moveLeft(newBoard));
+      if (util.canMoveLeft(board)) {
+        dispatch(moveLeft(board));
+      }
     },
     moveRight: board => {
-      const newBoard = util.moveRight(board);
-      dispatch(moveRight(newBoard));
+      if (util.canMoveRight(board)) {
+        dispatch(moveRight(board));
+      }
     },
     moveUp: board => {
-      const newBoard = util.moveUp(board);
-      dispatch(moveUp(newBoard));
+      if (util.canMoveUp(board)) {
+        dispatch(moveUp(board));
+      }
     },
     moveDown: board => {
-      const newBoard = util.moveDown(board);
-      dispatch(moveDown(newBoard));
+      if (util.canMoveDown(board)) {
+        dispatch(moveDown(board));
+      }
     }
   };
 };

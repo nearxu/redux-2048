@@ -4,6 +4,7 @@ const MOVE_LEFT = "MOVE_LEFT";
 const MOVE_RIGHT = "MOVE_RIGHT";
 const MOVE_UP = "MOVE_UP";
 const MOVE_DOWN = "MOVE_DOWN";
+const UPDATE_SCORE = "UPDATE_SCORE";
 
 export const initBoard = board => {
   return {
@@ -38,23 +39,32 @@ export const moveDown = board => {
   };
 };
 
-const board = (state, action) => {
-  if (!state) {
-    state = {
-      board: util.createBoard(0)
-    };
-  }
+export const updateScore = score => {
+  return {
+    type: UPDATE_SCORE,
+    score
+  };
+};
+
+const initState = {
+  board: util.createBoard(0),
+  score: 0
+};
+
+const board = (state = initState, action) => {
   switch (action.type) {
     case INIT_BOARD:
-      return { board: [...action.board] };
+      return { ...state, board: [...action.board] };
     case MOVE_LEFT:
-      return { board: [...action.board] };
+      return { ...state, board: [...action.board] };
     case MOVE_RIGHT:
-      return { board: [...action.board] };
+      return { ...state, board: [...action.board] };
     case MOVE_UP:
-      return { board: [...action.board] };
+      return { ...state, board: [...action.board] };
     case MOVE_DOWN:
-      return { board: [...action.board] };
+      return { ...state, board: [...action.board] };
+    case UPDATE_SCORE:
+      return { ...state, score: action.score };
     default:
       return state;
   }
