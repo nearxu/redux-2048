@@ -9,9 +9,10 @@ import {
   moveRight,
   moveUp,
   moveDown,
-  updateScore
+  updateScore,
+  reset
 } from "../reducer/game";
-import { addCube } from "../reducer/cube";
+import { addCube, deleteCubes } from "../reducer/cube";
 import "../../css/board.scss";
 import { WSAECONNRESET } from "constants";
 
@@ -85,9 +86,8 @@ class Board extends React.Component {
     while (num > 0) {
       // game over
       if (util.noSpace(matrix)) {
-        alert("game over");
-        return false;
         matrix[randx][randy] = value;
+        return false;
         // this.props.updateBoard(matrix);
       }
       var randx = util.getRandomNumber(0, 4);
@@ -110,12 +110,22 @@ class Board extends React.Component {
     this.props.updateBoard(matrix);
     return true;
   }
+  handleRest() {
+    const { board, cubes } = this.props;
+    this.props.reset();
+    this.props.deleteCubes();
+    this.generateCubes(board, 2);
+  }
   render() {
     // // cubes [[0,0,0,0]*4]   board [{x:1,y:2,value:2}]
     const { board, cubes, score } = this.props;
     return (
       <div>
-        <h1> score : {score}</h1>
+        <h1>
+          {" "}
+          score : {score}{" "}
+          <span onClick={this.handleRest.bind(this)}>reset</span>
+        </h1>
         <div className="grid-container">
           {// 这是棋盘
           board.map((rowAry, rowIndex) =>
@@ -137,7 +147,8 @@ class Board extends React.Component {
 const mapStateToProps = state => {
   return {
     board: state.game.board,
-    score: state.game.score
+    score: state.game.score,
+    cubes: state.cube.cubes
   };
 };
 
@@ -176,6 +187,12 @@ const dispatchToProps = dispatch => {
       if (util.canMoveDown(board)) {
         dispatch(moveDown(board));
       }
+    },
+    reset: () => {
+      dispatch(reset());
+    },
+    deleteCubes: () => {
+      dispatch(deleteCubes());
     }
   };
 };

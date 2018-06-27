@@ -5,6 +5,7 @@ const MOVE_RIGHT = "MOVE_RIGHT";
 const MOVE_UP = "MOVE_UP";
 const MOVE_DOWN = "MOVE_DOWN";
 const UPDATE_SCORE = "UPDATE_SCORE";
+const RESET = "RESET";
 
 export const initBoard = board => {
   return {
@@ -46,6 +47,12 @@ export const updateScore = score => {
   };
 };
 
+export const reset = () => {
+  return {
+    type: RESET
+  };
+};
+
 const initState = {
   board: util.createBoard(0),
   score: 0
@@ -65,6 +72,11 @@ const board = (state = initState, action) => {
       return { ...state, board: [...action.board] };
     case UPDATE_SCORE:
       return { ...state, score: action.score };
+    case RESET:
+      return {
+        board: util.createBoard(0),
+        score: 0
+      };
     default:
       return state;
   }
